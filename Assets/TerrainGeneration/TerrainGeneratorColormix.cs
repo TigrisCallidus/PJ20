@@ -38,12 +38,12 @@ public class TerrainGeneratorColormix : MonoBehaviour {
 
     [Tooltip("The gradient used to color the terrain. (The mesh has vertex color set and uses a simple shader which uses them)")]
     public Gradient HeighGradient0;
-    public Gradient HeighGradient1;
-    public Gradient HeighGradient2;
-    public Gradient HeighGradient3;
-    public Gradient HeighGradient4;
-    public Gradient HeighGradient5;
-    public Gradient HeighGradient6;
+    //public Gradient HeighGradient1;
+    //public Gradient HeighGradient2;
+    //public Gradient HeighGradient3;
+    //public Gradient HeighGradient4;
+    //public Gradient HeighGradient5;
+    //public Gradient HeighGradient6;
 
     public Texture2D TerritoryDistribution;
 
@@ -63,11 +63,12 @@ public class TerrainGeneratorColormix : MonoBehaviour {
     [Tooltip("The used profile for the settings above. Different profiles allow to easy save and switch profiles for different kinds of pcitures.")]
     public MeshCreationSettings UsedProfile;
 
-
+    public bool UseMix = false;
 
     //Linking only uncomment the HideInInspector if the link is somehow lost
-    [HideInInspector]
+    //[HideInInspector]
     public MeshFilter TargetMesh;
+    public MeshCollider TargetCollider;
 
     //No need to show in the editor, can be accessed from other scripts. 
     [HideInInspector]
@@ -115,6 +116,8 @@ public class TerrainGeneratorColormix : MonoBehaviour {
             Data2D = null;
         }
     }
+    int Width;
+    int Height;
 
     /// <summary>
     /// Transforming the image into 2D Data. (An internal 2D float array).
@@ -129,13 +132,13 @@ public class TerrainGeneratorColormix : MonoBehaviour {
             }
         }
 
-        int width = InputTexture.width;
-        int height = InputTexture.height;
+        Width = InputTexture.width;
+        Height = InputTexture.height;
 
-        Data2D = new DataGrid(width, height);
+        Data2D = new DataGrid(Width, Height);
 
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
+        for (int i = 0; i < Width; i++) {
+            for (int j = 0; j < Height; j++) {
                 Color color = InputTexture.GetPixel(i, j);
                 float luma = 0.2126f * color.r + 0.7152f * color.g + 0.0722f * color.b;
                 if (Invert) {
@@ -154,8 +157,8 @@ public class TerrainGeneratorColormix : MonoBehaviour {
         if (Data2D == null) {
             Generate2DData();
         }
-        int width = InputTexture.width;
-        int height = InputTexture.height;
+        //int Width = InputTexture.width;
+        //int Height = InputTexture.height;
         int vertical = MaxHeight + 1;
 
 
@@ -166,9 +169,9 @@ public class TerrainGeneratorColormix : MonoBehaviour {
 
         if (AlwaysDrawBottomCube) {
             vertical = vertical + 1;
-            Data3D = new Data3D(width, height, vertical);
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
+            Data3D = new Data3D(Width, Height, vertical);
+            for (int x = 0; x < Width; x++) {
+                for (int y = 0; y < Height; y++) {
                     for (int z = 0; z < 1; z++) {
                         Data3D[x, y, z].Value = 1;
                     }
@@ -176,12 +179,12 @@ public class TerrainGeneratorColormix : MonoBehaviour {
             }
             startZ = 1;
         } else {
-            Data3D = new Data3D(width, height, vertical);
+            Data3D = new Data3D(Width, Height, vertical);
         }
 
         for (int z = startZ; z < vertical - 1; z++) {
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
+            for (int x = 0; x < Width; x++) {
+                for (int y = 0; y < Height; y++) {
                     if (AlwaysDrawBottomCube && z == 1) {
                         Data3D[x, y, z].Value = 1;
                     } else {
@@ -233,7 +236,8 @@ public class TerrainGeneratorColormix : MonoBehaviour {
         }
 
         if (TargetMesh!=null) {
-            TargetMesh.mesh = GeneratedMesh;
+            TargetMesh.sharedMesh = GeneratedMesh;
+            TargetCollider.sharedMesh = TargetMesh.sharedMesh;
 
         } else {
             Debug.LogError("TargetMesh is null, need to be linked again");
@@ -374,6 +378,8 @@ public class TerrainGeneratorColormix : MonoBehaviour {
     /// <summary>
     /// Colors the mesh. (Setting the color parameters) according to the chosen parameters (Heighgradient, Colorscaling and ColorOffset).
     /// </summary>
+
+    /*
     public void ColorMesh() {
 
         if (GeneratedMesh==null) {
@@ -388,34 +394,58 @@ public class TerrainGeneratorColormix : MonoBehaviour {
         Color[] colors = new Color[vertexCount];
         for (int i = 0; i < vertexCount; i++) {
 
-            int gradientNumber = CalculateGradient(vertices[i]);
-
             Gradient gradient = HeighGradient0;
 
-            switch (gradientNumber) {
-                case 1:
-                    gradient = HeighGradient1;
-                    break;
-                case 2:
-                    gradient = HeighGradient2;
-                    break;
-                case 3:
-                    gradient = HeighGradient3;
-                    break;
-                case 4:
-                    gradient = HeighGradient4;
-                    break;
-                case 5:
-                    gradient = HeighGradient5;
-                    break;
-                case 6:
-                    gradient = HeighGradient6;
-                    break;
-                default:
-                    break;
+            if (UseMix) {
+
+                int gradientNumber = CalculateGradient(vertices[i]);
+                switch (gradientNumber) {
+                    case 1:
+                        gradient = HeighGradient1;
+                        break;
+                    case 2:
+                        gradient = HeighGradient2;
+                        break;
+                    case 3:
+                        gradient = HeighGradient3;
+                        break;
+                    case 4:
+                        gradient = HeighGradient4;
+                        break;
+                    case 5:
+                        gradient = HeighGradient5;
+                        break;
+                    case 6:
+                        gradient = HeighGradient6;
+                        break;
+                    default:
+                        break;
+                }
             }
 
             colors[i] = gradient.Evaluate((vertices[i].y / MaxHeight) * ColorScaling + ColorOffset);
+            colors[i] = Color.red;
+        }
+
+        GeneratedMesh.colors = colors;
+    } */
+
+    public void ColorMesh() {
+
+        Debug.Log("Do coloring");
+
+        if (GeneratedMesh == null) {
+            Debug.LogWarning("There is no mesh generated. Generating mesh.");
+            GenerateMesh(false);
+        }
+
+        Vector3[] vertices = GeneratedMesh.vertices;
+
+        int vertexCount = vertices.Length;
+
+        Color[] colors = new Color[vertexCount];
+        for (int i = 0; i < vertexCount; i++) {
+            colors[i] = HeighGradient0.Evaluate((vertices[i].y / MaxHeight) * ColorScaling + ColorOffset);
         }
 
         GeneratedMesh.colors = colors;
@@ -463,7 +493,6 @@ public class TerrainGeneratorColormix : MonoBehaviour {
         } else if (color.b > 0.5f) {
             returnValue = 5;
         }
-
 
         return returnValue;
     }

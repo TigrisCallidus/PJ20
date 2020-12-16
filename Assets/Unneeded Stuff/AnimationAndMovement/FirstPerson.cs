@@ -15,9 +15,6 @@ public class FirstPerson : MonoBehaviour {
     public float TurboIncrease = 3f;
     private float rotX;
 
-    void Awake() {
-        Cinemachine.enabled = false;
-    }
 
     void Update() {
         MouseAiming();

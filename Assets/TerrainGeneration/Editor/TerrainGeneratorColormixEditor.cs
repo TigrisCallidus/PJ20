@@ -15,14 +15,14 @@
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(TerrainGenerator))]
+[CustomEditor(typeof(TerrainGeneratorColormix))]
 //Custom Editor for the QuantumBlurUnity class, adding some buttons and a representation of the Maze
-public class TerrainGeneratorEditor : Editor {
+public class TerrainGeneratorColormixEditor : Editor {
 
-    TerrainGenerator targetScript;
+    TerrainGeneratorColormix targetScript;
 
     void OnEnable() {
-        targetScript = target as TerrainGenerator;
+        targetScript = target as TerrainGeneratorColormix;
     }
 
     public override void OnInspectorGUI() {
@@ -35,9 +35,9 @@ public class TerrainGeneratorEditor : Editor {
         if (GUILayout.Button("Apply Blur effect to the Texture to Blur")) {
             targetScript.ApplyBlur();
         }
-        
+
         //if (GUILayout.Button("Apply your own effect to the Texture to Blur")) {
-            //targetScript.ApplyYourOwnEffect();
+        //targetScript.ApplyYourOwnEffect();
         //}
 
         /*
